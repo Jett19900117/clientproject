@@ -1,0 +1,44 @@
+Hi
+ My Skype Id :   live:.cid.2f93af6d400bf2a6
+
+export const updateTwilioKeyDetails = (twilioupdatekey, navigate) => async (dispatch, getState) => {
+  try {
+    dispatch({
+      type: TWILIO_UPDATE_REQUEST
+    });
+    const {
+      userLogin: { loginInfo },
+      userProfileInfo: { userInfo }
+    } = getState();
+    const config = {
+      headers: {
+        'Content-type': 'application/json',
+        Authorization: `Bearer ${loginInfo.token}`
+      }
+    };
+
+    const { data } = await axios.put(
+      `/api/v1/users/twilio/update/`,
+      {
+        twilio_account_sid: twilioupdatekey.twiloAccoundId,
+        twilio_secret_key: twilioupdatekey.twiloApiSecret,
+        twilio_api_key: twilioupdatekey.twiloApiKey
+      },
+      config
+    );
+
+    dispatch({
+      type: TWILIO_UPDATE_SUCCESS,
+      payload: data
+    });
+    dispatch(showSuccessSnackbar('Twilio information successfully updated.'));
+    navigate(`/${userInfo.company.company_slug}/settings/twilo-options`);
+  } catch (error) {
+    dispatch({
+      type: TWILIO_UPDATE_FAIL,
+      payload:
+        error.response && error.response.data.detail ? error.response.data.detail : error.message
+    });
+    dispatch(showErrorSnackbar('Failed to update Twilio Key information.'));
+  }
+};
